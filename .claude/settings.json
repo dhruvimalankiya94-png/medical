@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ' *)",
+      "Bash(ls /Applications | grep -i libre; which soffice libreoffice textutil 2>/dev/null; ls /Applications/LibreOffice.app/Contents/MacOS/soffice 2>/dev/null && echo FOUND)",
+      "Read(//Applications/**)",
+      "Read(//Applications/LibreOffice.app/Contents/MacOS/**)",
+      "Bash(/private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/testvenv/bin/pip list *)",
+      "Bash(curl -s -o /dev/null -w \"docs http=%{http_code}\\\\n\" http://127.0.0.1:8000/docs)",
+      "Bash(grep -nA30 -i \"accuracy\\\\|performance\\\\|metric\" ml/README.md)",
+      "Bash(curl -s -o /dev/null -w \"%{time_total}\\\\n\" -X POST \"http://127.0.0.1:5001/api/auth/login\" -H 'Content-Type: application/json' -d '{\"email\":\"priya.patel@email.com\",\"password\":\"Password123!\"}')",
+      "Bash(cp /private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/count.js \"/Users/jayhirpara/Documents/Dhruvi Pro/medical_project/backend/_count_tmp.js\")",
+      "Bash(node _count_tmp.js)",
+      "Bash(rm -f \"/Users/jayhirpara/Documents/Dhruvi Pro/medical_project/backend/_count_tmp.js\")",
+      "Bash(curl -s -w \"\\\\nGET /api/patients \\(no token\\) http=%{http_code}\\\\n\" http://127.0.0.1:5001/api/patients)",
+      "Bash(curl -s -w \"\\\\nGET /api/hospital/dashboard/stats \\(no token\\) http=%{http_code}\\\\n\" http://127.0.0.1:5001/api/hospital/dashboard/stats)",
+      "Bash(cd \"/Users/jayhirpara/Documents/Dhruvi Pro/medical_project/backend\" && grep -rn \"validateHealthRecord\\\\|validateRegister\\\\|validateLogin\" . 2>/dev/null | grep -v node_modules; echo \"---get_predictor---\"; grep -n \"_predictor_instance\\\\|def get_predictor\" -A5 ../ml/src/predict.py | tail -30; echo \"---api.py---\"; grep -n \"@app\\\\.\" ../ml/src/api.py)",
+      "Read(//Users/jayhirpara/Documents/Dhruvi Pro/ml/src/**)",
+      "Bash(python3 -c \"import sys;print\\(sys.executable\\)\")",
+      "Bash(./testvenv/bin/python -c \"import docx; print\\('ok'\\)\")",
+      "Bash(./testvenv/bin/python -)",
+      "Bash(ls /Applications | grep -i libre; which soffice; ls \"/Applications/LibreOffice.app/Contents/MacOS/soffice\" 2>/dev/null)",
+      "Bash(ls /Applications | grep -i libre; which soffice libreoffice 2>/dev/null; echo done)",
+      "Bash(curl -s -m 3 http://127.0.0.1:5001/api/health)",
+      "Bash(curl -s -m 3 -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8000/docs)",
+      "Bash(curl -s -m 5 -o /dev/null -w \"patients:%{http_code}\\\\n\" http://127.0.0.1:5001/api/patients)",
+      "Bash(curl -s -m 5 http://127.0.0.1:5001/api/hospital/dashboard/stats)",
+      "Bash(curl -s -m 5 -o /dev/null -w \"records_notoken:%{http_code}\\\\n\" http://127.0.0.1:5001/api/records)",
+      "Bash(./node_modules/.bin/vite build *)",
+      "Bash(cp '/private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/shots/Screenshot 2.png' '/Users/jayhirpara/Documents/Dhruvi Pro/medical_project/Reporting/Images/')",
+      "Bash(git config *)",
+      "Bash(git init *)",
+      "Bash(echo \"  local identity: $\\(git config user.name\\) <$\\(git config user.email\\)>\")",
+      "Bash(git add *)"
+    ]
+  }
+}

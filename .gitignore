@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+ml/.venv/
+*.log
+.ml.log
+.backend.log
+.DS_Store
+Thumbs.db
+Reporting/Reporting 3 - *.docx
