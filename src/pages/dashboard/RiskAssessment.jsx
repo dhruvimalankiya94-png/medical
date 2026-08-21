@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { AlertTriangle, ShieldCheck, Activity, HeartPulse, Scale, Droplets, Sparkles, Loader2 } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, Activity, Sparkles, Loader2 } from 'lucide-react';
 import { recordsAPI, riskAPI } from '../../services/api';
 import Alert from '../../components/common/Alert';
 import Button from '../../components/common/Button';
