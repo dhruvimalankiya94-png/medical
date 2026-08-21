@@ -31,7 +31,11 @@
       "Bash(git config *)",
       "Bash(git init *)",
       "Bash(echo \"  local identity: $\\(git config user.name\\) <$\\(git config user.email\\)>\")",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(grep -E \"^backend/\\\\.env$\")",
+      "Bash(git rm *)",
+      "Bash(git commit *)",
+      "Bash(grep -E \"\\\\.env$\")"
     ]
   }
 }
