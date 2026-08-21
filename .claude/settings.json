@@ -35,7 +35,26 @@
       "Bash(grep -E \"^backend/\\\\.env$\")",
       "Bash(git rm *)",
       "Bash(git commit *)",
-      "Bash(grep -E \"\\\\.env$\")"
+      "Bash(grep -E \"\\\\.env$\")",
+      "Bash(xargs -I{} echo \"  static-card references in committed file: {} \\(0 = fix is committed\\)\")",
+      "Bash(/private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/testvenv/bin/python /private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/vfy.py)",
+      "Bash(npx vite *)",
+      "Bash(grep -o '.\\\\{0,150\\\\}Times New Roman.\\\\{0,150\\\\}' word/styles.xml)",
+      "Bash(/private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/testvenv/bin/python /private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/vfy2.py)",
+      "Bash(/private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/testvenv/bin/python /private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/vfy3.py)",
+      "Bash(timeout 300 npx --no-install vite build)",
+      "Bash(npx --no-install vite build)",
+      "Bash(sips -g pixelWidth -g pixelHeight image7.png image8.png image9.png image4.jpg)",
+      "Bash(sips -Z 1400 --out /private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/v7.png image7.png)",
+      "Bash(sips -Z 1400 --out /private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/v8.png image8.png)",
+      "Bash(sips -Z 1400 --out /private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/v9.png image9.png)",
+      "Bash(sips -Z 1400 --out /private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/v4.jpg image4.jpg)",
+      "Bash(sips -Z 1400 --out /private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/v5.jpg image5.jpg)",
+      "Bash(./testvenv/bin/python -c ' *)",
+      "Bash(ls /Applications/ | grep -i libre; which soffice libreoffice 2>/dev/null; ls \"/Applications/LibreOffice.app/Contents/MacOS/soffice\" 2>/dev/null && echo FOUND)",
+      "Bash(node -e ' *)",
+      "Bash(/private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/testvenv/bin/python /private/tmp/claude-502/-Users-jayhirpara-Documents-Dhruvi-Pro-medical-project/1eb35e99-a520-4a5f-91fa-40eb60902ecd/scratchpad/before.py)",
+      "Bash(which soffice *)"
     ]
   }
 }
