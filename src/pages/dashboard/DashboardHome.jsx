@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { dashboardAPI, recordsAPI } from '../../services/api';
 import HealthScoreMeter from '../../components/dashboard/HealthScoreMeter';
 import BmiGauge from '../../components/dashboard/BmiGauge';
+import HealthAlerts from '../../components/dashboard/HealthAlerts';
 
 const DashboardHome = () => {
   const { user } = useAuth();
@@ -68,6 +69,8 @@ const DashboardHome = () => {
           </Link>
         </div>
       </motion.div>
+
+      <HealthAlerts />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {statCards.map((card, idx) => {

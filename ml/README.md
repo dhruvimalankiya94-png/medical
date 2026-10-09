@@ -66,15 +66,50 @@ A **Stratified 80/20 Train/Test Split** (`random_state=42`) was performed to mai
 
 ### Baseline vs Primary Model Metrics
 
+These figures are the ones produced by `ml/src/train.py` and written to
+`ml/models/evaluation_report.json`. The split and both estimators are seeded
+with `random_state=42`, so re-running training on the same library versions
+reproduces every figure below exactly.
+
+Measured on scikit-learn 1.9.0, numpy 2.5.2, pandas 3.0.5, Python 3.12.6.
+
 | Evaluation Metric | Baseline (Logistic Regression) | Selected Model (Random Forest Classifier) |
 |---|---|---|
-| **Accuracy** | 74.68% | **77.92%** |
-| **Precision** | 68.00% | **72.55%** |
-| **Recall (Sensitivity)** | 56.67% | **68.52%** |
-| **F1-Score** | 61.82% | **70.48%** |
-| **ROC-AUC** | 81.25% | **84.36%** |
+| **Accuracy** | 70.78% | **74.68%** |
+| **Precision** | 60.00% | **68.29%** |
+| **Recall (Sensitivity)** | 50.00% | **51.85%** |
+| **F1-Score** | 54.55% | **58.95%** |
+| **ROC-AUC** | 81.30% | **81.52%** |
 
-> **Selection Rationale**: `RandomForestClassifier(n_estimators=100, max_depth=8)` was chosen because it achieves significantly higher **Recall (68.52% vs 56.67%)** and **F1-Score (70.48% vs 61.82%)**, drastically reducing False Negatives on diabetic patients while capturing non-linear interactions between Glucose, Insulin, and BMI.
+> **Note on ROC-AUC.** An earlier run of this pipeline, on the older
+> scikit-learn that the project was first developed against, reported a Random
+> Forest ROC-AUC of 81.70%. Every other metric and both confusion matrices are
+> unchanged. ROC-AUC is computed from predicted probabilities rather than from
+> the hard class labels, so small implementation changes between library
+> versions can move it slightly without altering a single prediction at the 0.5
+> threshold. `requirements.txt` uses `>=` constraints, which is what allowed the
+> version to drift; pin exact versions if a figure has to stay byte-identical
+> across machines.
+
+Confusion matrices on the 154 test samples, as `[[TN, FP], [FN, TP]]`:
+
+| Model | Matrix | TN | FP | FN | TP |
+|---|---|---|---|---|---|
+| Logistic Regression | `[[82, 18], [27, 27]]` | 82 | 18 | 27 | 27 |
+| Random Forest | `[[87, 13], [26, 28]]` | 87 | 13 | 26 | 28 |
+
+> **Selection Rationale**: `RandomForestClassifier(n_estimators=100, max_depth=8)`
+> was selected because it outperforms the baseline on all five metrics, and
+> because it models the non-linear interactions between Glucose, Insulin and BMI.
+> The margin on recall is small (51.85% vs 50.00%), so the gain is mainly in
+> precision (68.29% vs 60.00%) and in fewer false positives (13 vs 18).
+
+> **Known limitation**: recall of 51.85% means the model misses roughly half of
+> the genuinely diabetic cases in the test set (26 false negatives out of 54
+> positives). In a clinical setting a false negative is the more harmful error,
+> so this model is a screening aid for an educational project and is not suitable
+> for diagnostic use. Raising recall — by threshold tuning, class weighting or
+> resampling the minority class — is the clearest avenue for future work.
 
 ---
 

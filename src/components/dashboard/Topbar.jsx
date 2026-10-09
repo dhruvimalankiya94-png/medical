@@ -4,12 +4,16 @@ import {
   X, Loader2, FileText
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { recordsAPI } from '../../services/api';
+import { recordsAPI, alertsAPI } from '../../services/api';
+import { avatarUrl } from '../../utils/avatar';
 
 const Topbar = ({ setMobileOpen }) => {
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [alerts, setAlerts] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -18,11 +22,24 @@ const Topbar = ({ setMobileOpen }) => {
   const searchRef = useRef(null);
   const debounceRef = useRef(null);
 
-  const notifications = [
-    { id: 1, title: 'Daily health check reminder', time: '10m ago', type: 'success' },
-    { id: 2, title: 'Water intake goal 83% achieved', time: '1h ago', type: 'info' },
-    { id: 3, title: 'Weekly report ready', time: '3h ago', type: 'warning' }
-  ];
+  // The bell reflects the real threshold alerts produced by /api/alerts rather
+  // than a fixed list, so the unread dot means something.
+  useEffect(() => {
+    let cancelled = false;
+    alertsAPI
+      .getAll()
+      .then((res) => {
+        if (!cancelled) setAlerts(res.alerts || []);
+      })
+      .catch(() => {
+        if (!cancelled) setAlerts([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const actionableCount = alerts.filter((a) => a.severity !== 'info').length;
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -134,7 +151,13 @@ const Topbar = ({ setMobileOpen }) => {
             className="p-2 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-brand-400 border border-slate-200 dark:border-slate-800 relative"
           >
             <Bell className="w-4 h-4" />
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-brand-500" />
+            {alerts.length > 0 && (
+              <span
+                className={`absolute top-1 right-1 w-2 h-2 rounded-full ${
+                  actionableCount > 0 ? 'bg-rose-500' : 'bg-brand-500'
+                }`}
+              />
+            )}
           </button>
 
           {showNotifications && (
@@ -146,12 +169,21 @@ const Topbar = ({ setMobileOpen }) => {
                 </button>
               </div>
               <div className="space-y-2">
-                {notifications.map((n) => (
-                  <div key={n.id} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs">
-                    <p className="font-semibold text-slate-900 dark:text-slate-200">{n.title}</p>
-                    <span className="text-[10px] text-slate-400 mt-1 block">{n.time}</span>
-                  </div>
-                ))}
+                {alerts.length === 0 ? (
+                  <p className="text-xs text-slate-500 dark:text-slate-400 py-2">
+                    No health alerts. All your latest readings are within range.
+                  </p>
+                ) : (
+                  alerts.map((n) => (
+                    <div key={n.id} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs">
+                      <p className="font-semibold text-slate-900 dark:text-slate-200">{n.title}</p>
+                      <span className="text-[10px] text-slate-400 mt-1 block">
+                        {n.metric}
+                        {n.value ? ` \u00b7 ${n.value}` : ''}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -166,8 +198,8 @@ const Topbar = ({ setMobileOpen }) => {
 
         <Link to="/profile" className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
           <img
-            src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150"
-            alt="User Avatar"
+            src={avatarUrl(user)}
+            alt={user?.name || 'User Avatar'}
             className="w-8 h-8 rounded-full object-cover border border-brand-500"
           />
         </Link>

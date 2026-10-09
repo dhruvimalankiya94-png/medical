@@ -1,4 +1,5 @@
 const DailyTask = require('../models/DailyTask');
+const { toDateKey } = require('../utils/date');
 
 const getDailyTasks = async (req, res) => {
   try {
@@ -96,17 +97,21 @@ const getStreak = async (req, res) => {
 
     const allTasks = await DailyTask.find({ user: userId }).sort({ taskDate: -1 });
     if (allTasks.length === 0) {
+      // Same shape as the populated response; the empty case previously omitted
+      // totalTasks and completedTasks, so callers saw undefined instead of 0.
       return res.json({
         currentStreak: 0,
         longestStreak: 0,
         weeklyStreak: 0,
         monthlyStreak: 0,
+        totalTasks: 0,
+        completedTasks: 0,
       });
     }
 
     const dateMap = {};
     allTasks.forEach((task) => {
-      const dateKey = new Date(task.taskDate).toISOString().split('T')[0];
+      const dateKey = toDateKey(task.taskDate);
       if (!dateMap[dateKey]) dateMap[dateKey] = { total: 0, completed: 0 };
       dateMap[dateKey].total += 1;
       if (task.completed) dateMap[dateKey].completed += 1;
@@ -117,7 +122,7 @@ const getStreak = async (req, res) => {
     let currentStreak = 0;
     let checkDate = new Date(today);
     for (let i = 0; i < 365; i++) {
-      const key = checkDate.toISOString().split('T')[0];
+      const key = toDateKey(checkDate);
       const dayData = dateMap[key];
       if (dayData && dayData.completed === dayData.total && dayData.total > 0) {
         currentStreak++;
@@ -150,7 +155,7 @@ const getStreak = async (req, res) => {
       const d = new Date(weekStart);
       d.setDate(d.getDate() + i);
       if (d > today) break;
-      const key = d.toISOString().split('T')[0];
+      const key = toDateKey(d);
       const dayData = dateMap[key];
       if (dayData && dayData.completed === dayData.total && dayData.total > 0) {
         weeklyStreak++;
@@ -160,7 +165,7 @@ const getStreak = async (req, res) => {
     let monthlyStreak = 0;
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
     for (let d = new Date(monthStart); d <= today; d.setDate(d.getDate() + 1)) {
-      const key = d.toISOString().split('T')[0];
+      const key = toDateKey(d);
       const dayData = dateMap[key];
       if (dayData && dayData.completed === dayData.total && dayData.total > 0) {
         monthlyStreak++;
@@ -184,7 +189,7 @@ const getTaskHistory = async (req, res) => {
   try {
     const { days = 30 } = req.query;
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - Number(days));
+    startDate.setDate(startDate.getDate() - (Number(days) - 1));
     startDate.setHours(0, 0, 0, 0);
 
     const tasks = await DailyTask.find({
@@ -194,17 +199,22 @@ const getTaskHistory = async (req, res) => {
 
     const dateMap = {};
     tasks.forEach((task) => {
-      const key = new Date(task.taskDate).toISOString().split('T')[0];
+      const key = toDateKey(task.taskDate);
       if (!dateMap[key]) dateMap[key] = { total: 0, completed: 0 };
       dateMap[key].total += 1;
       if (task.completed) dateMap[key].completed += 1;
     });
 
+    // The window ends on today inclusive. The previous loop started at
+    // (today - days) and ran for `days` entries, so it stopped at yesterday and
+    // today never appeared on the progress heatmap.
     const history = [];
-    for (let i = 0; i < Number(days); i++) {
-      const d = new Date(startDate);
-      d.setDate(d.getDate() + i);
-      const key = d.toISOString().split('T')[0];
+    const windowSize = Number(days);
+    for (let i = windowSize - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setHours(12, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      const key = toDateKey(d);
       const data = dateMap[key] || { total: 0, completed: 0 };
       history.push({
         date: key,

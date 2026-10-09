@@ -7,11 +7,13 @@ const Button = ({
   size = 'md', 
   icon: Icon, 
   iconPosition = 'right', 
-  className = '', 
+  className = '',
   onClick,
-  type = 'button'
+  type = 'button',
+  disabled = false,
+  ...props
 }) => {
-  const baseStyles = "inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 cursor-pointer";
+  const baseStyles = "inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer";
   
   const variants = {
     primary: "bg-gradient-to-r from-brand-500 via-teal-500 to-cyan-500 hover:from-brand-600 hover:to-cyan-600 text-white shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 hover:-translate-y-0.5 border border-brand-400/30 focus:ring-brand-500",
@@ -28,10 +30,12 @@ const Button = ({
 
   return (
     <motion.button
-      whileTap={{ scale: 0.97 }}
+      whileTap={disabled ? undefined : { scale: 0.97 }}
       type={type}
+      disabled={disabled}
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
       onClick={onClick}
+      {...props}
     >
       {Icon && iconPosition === 'left' && <Icon className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />}
       <span>{children}</span>

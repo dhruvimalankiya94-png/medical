@@ -6,7 +6,7 @@ import { healthProfileAPI, authAPI } from '../../services/api';
 import Alert from '../../components/common/Alert';
 
 const Profile = () => {
-  const { user, login } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -78,10 +78,11 @@ const Profile = () => {
 
     setUploading(true);
     try {
-      const result = await authAPI.uploadAvatar(file);
-      const updatedUser = { ...user, avatar: result.avatar };
-      localStorage.setItem('healthcare_user', JSON.stringify(updatedUser));
-      login(updatedUser);
+      await authAPI.uploadAvatar(file);
+      // Re-read the account from the server so the sidebar and topbar update.
+      // This previously called login(updatedUser), but login's signature is
+      // (email, password), so it fired a doomed login request instead.
+      await refreshUser();
       setAlertState({ type: 'success', title: 'Success', message: 'Profile photo updated' });
     } catch (err) {
       setAvatarPreview(null);
@@ -94,8 +95,11 @@ const Profile = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      if (formData.name !== user?.name) {
+      if (formData.name !== user?.name || formData.phone !== user?.phone) {
         await authAPI.updateProfile({ name: formData.name, phone: formData.phone });
+        // Keep the cached account in sync so the sidebar and topbar show the
+        // new name straight away instead of after the next page load.
+        await refreshUser();
       }
 
       const profileData = {

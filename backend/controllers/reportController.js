@@ -1,5 +1,6 @@
 const HealthRecord = require('../models/HealthRecord');
 const DailyTask = require('../models/DailyTask');
+const { toDateKey } = require('../utils/date');
 
 const getWeeklyReport = async (req, res) => {
   try {
@@ -12,8 +13,8 @@ const getWeeklyReport = async (req, res) => {
 
     const records = await HealthRecord.find({
       user: userId,
-      createdAt: { $gte: weekStart, $lte: today },
-    }).sort({ createdAt: 1 });
+      recordDate: { $gte: weekStart, $lte: today },
+    }).sort({ recordDate: 1 });
 
     const tasks = await DailyTask.find({
       user: userId,
@@ -60,9 +61,9 @@ const getWeeklyReport = async (req, res) => {
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
-      const dayKey = d.toISOString().split('T')[0];
-      const dayRecords = records.filter((r) => new Date(r.createdAt).toISOString().split('T')[0] === dayKey);
-      const dayTasks = tasks.filter((t) => new Date(t.taskDate).toISOString().split('T')[0] === dayKey);
+      const dayKey = toDateKey(d);
+      const dayRecords = records.filter((r) => toDateKey(r.recordDate) === dayKey);
+      const dayTasks = tasks.filter((t) => toDateKey(t.taskDate) === dayKey);
       const dayCompleted = dayTasks.filter((t) => t.completed).length;
 
       dailyBreakdown.push({
@@ -107,8 +108,8 @@ const getMonthlyReport = async (req, res) => {
 
     const records = await HealthRecord.find({
       user: userId,
-      createdAt: { $gte: monthStart, $lte: today },
-    }).sort({ createdAt: 1 });
+      recordDate: { $gte: monthStart, $lte: today },
+    }).sort({ recordDate: 1 });
 
     const tasks = await DailyTask.find({
       user: userId,
@@ -159,7 +160,7 @@ const getMonthlyReport = async (req, res) => {
       if (weekEnd > today) break;
 
       const weekRecords = records.filter((r) => {
-        const d = new Date(r.createdAt);
+        const d = new Date(r.recordDate);
         return d >= weekStart2 && d <= weekEnd;
       });
       const weekTasks = tasks.filter((t) => {
@@ -169,8 +170,8 @@ const getMonthlyReport = async (req, res) => {
 
       weeklyBreakdown.push({
         week: w + 1,
-        start: weekStart2.toISOString().split('T')[0],
-        end: weekEnd.toISOString().split('T')[0],
+        start: toDateKey(weekStart2),
+        end: toDateKey(weekEnd),
         recordsLogged: weekRecords.length,
         tasksCompleted: weekTasks.filter((t) => t.completed).length,
         tasksTotal: weekTasks.length,
@@ -208,11 +209,11 @@ const getVitalsHistory = async (req, res) => {
 
     const records = await HealthRecord.find({
       user: req.user._id,
-      createdAt: { $gte: startDate },
-    }).sort({ createdAt: 1 });
+      recordDate: { $gte: startDate },
+    }).sort({ recordDate: 1 });
 
     const history = records.map((r) => ({
-      date: new Date(r.createdAt).toISOString().split('T')[0],
+      date: toDateKey(r.recordDate),
       bpSystolic: r.vitals?.bpSystolic || 0,
       bpDiastolic: r.vitals?.bpDiastolic || 0,
       sugar: r.vitals?.sugarFasting || 0,

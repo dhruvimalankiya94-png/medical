@@ -5,8 +5,10 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) return savedTheme;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'dark'; // Default dark theme
+    if (savedTheme === 'dark' || savedTheme === 'light') return savedTheme;
+    // Dark is the intended default for this app regardless of the OS setting,
+    // so the OS preference is deliberately not consulted here.
+    return 'dark';
   });
 
   useEffect(() => {

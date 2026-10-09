@@ -59,6 +59,26 @@ export const authAPI = {
       body: JSON.stringify({ resetToken, newPassword }),
     }),
 
+  changePassword: (currentPassword, newPassword) =>
+    request('/auth/change-password', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    }),
+
+  getPreferences: () => request('/auth/preferences'),
+
+  updatePreferences: (prefs) =>
+    request('/auth/preferences', {
+      method: 'PUT',
+      body: JSON.stringify(prefs),
+    }),
+
+  deleteAccount: (password) =>
+    request('/auth/me', {
+      method: 'DELETE',
+      body: JSON.stringify({ password }),
+    }),
+
   uploadAvatar: async (file) => {
     const token = getAuthToken();
     const formData = new FormData();
@@ -159,4 +179,47 @@ export const reportsAPI = {
   getWeekly: () => request('/reports/weekly'),
   getMonthly: () => request('/reports/monthly'),
   getVitalsHistory: (days) => request(`/reports/vitals-history?days=${days || 7}`),
+};
+
+export const alertsAPI = {
+  getAll: () => request('/alerts'),
+  getThresholds: () => request('/alerts/thresholds'),
+};
+
+/**
+ * Export endpoints stream a file rather than JSON, so they bypass request()
+ * and hand the browser a blob to save.
+ */
+const downloadFile = async (endpoint, fallbackName) => {
+  const token = getAuthToken();
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.message || `Export failed (${response.status})`);
+  }
+
+  // Use the filename the server chose when it provides one.
+  const disposition = response.headers.get('Content-Disposition') || '';
+  const match = /filename="([^"]+)"/.exec(disposition);
+  const filename = match ? match[1] : fallbackName;
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+
+  return filename;
+};
+
+export const exportAPI = {
+  recordsCsv: () => downloadFile('/export/records.csv', 'healthpulse_records.csv'),
+  allJson: () => downloadFile('/export/all.json', 'healthpulse_export.json'),
 };

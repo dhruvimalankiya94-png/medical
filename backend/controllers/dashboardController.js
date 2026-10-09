@@ -1,6 +1,7 @@
 const HealthRecord = require('../models/HealthRecord');
 const DailyTask = require('../models/DailyTask');
 const HealthProfile = require('../models/HealthProfile');
+const { toDateKey } = require('../utils/date');
 
 const getDashboardStats = async (req, res) => {
   try {
@@ -22,7 +23,7 @@ const getDashboardStats = async (req, res) => {
 
     const dateMap = {};
     allTasks.forEach((task) => {
-      const dateKey = new Date(task.taskDate).toISOString().split('T')[0];
+      const dateKey = toDateKey(task.taskDate);
       if (!dateMap[dateKey]) dateMap[dateKey] = { total: 0, completed: 0 };
       dateMap[dateKey].total += 1;
       if (task.completed) dateMap[dateKey].completed += 1;
@@ -31,7 +32,7 @@ const getDashboardStats = async (req, res) => {
     let currentStreak = 0;
     let checkDate = new Date(today);
     for (let i = 0; i < 365; i++) {
-      const key = checkDate.toISOString().split('T')[0];
+      const key = toDateKey(checkDate);
       const dayData = dateMap[key];
       if (dayData && dayData.completed === dayData.total && dayData.total > 0) {
         currentStreak++;
@@ -44,7 +45,7 @@ const getDashboardStats = async (req, res) => {
       }
     }
 
-    const latestRecord = await HealthRecord.findOne({ user: userId }).sort({ createdAt: -1 });
+    const latestRecord = await HealthRecord.findOne({ user: userId }).sort({ recordDate: -1 });
     const totalRecords = await HealthRecord.countDocuments({ user: userId });
 
     const profile = await HealthProfile.findOne({ user: userId });

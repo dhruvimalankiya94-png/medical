@@ -59,4 +59,9 @@ const predictionHistorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// The risk-assessment history page lists a user's predictions newest first.
+predictionHistorySchema.index({ user: 1, createdAt: -1 });
+// deleteHealthRecord cascades by healthRecord id.
+predictionHistorySchema.index({ healthRecord: 1 });
+
 module.exports = mongoose.model('PredictionHistory', predictionHistorySchema);

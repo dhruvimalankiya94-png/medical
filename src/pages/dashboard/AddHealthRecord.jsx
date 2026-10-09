@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  PlusCircle, User, Activity, HeartPulse, Scale, 
-  Droplets, ShieldCheck, ArrowRight, Loader2, FileText, 
-  AlertTriangle, CheckCircle2, Sparkles
+import {
+  PlusCircle, User, Activity, HeartPulse, Scale,
+  Droplets, ShieldCheck, Loader2, FileText, Sparkles,
+  Moon, Flame, Footprints, Dumbbell, Ruler, Smile
 } from 'lucide-react';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Alert from '../../components/common/Alert';
 import { recordsAPI } from '../../services/api';
+
+const MOOD_OPTIONS = ['great', 'good', 'okay', 'bad', 'terrible'];
 
 const AddHealthRecord = () => {
   const navigate = useNavigate();
@@ -26,10 +28,38 @@ const AddHealthRecord = () => {
     insulin: '',
     bmi: '',
     diabetesPedigreeFunction: '',
+    heartRate: '',
+    weight: '',
+    height: '',
+    sleepHours: '',
+    waterIntake: '',
+    exerciseMinutes: '',
+    caloriesIntake: '',
+    stepsCount: '',
+    mood: '',
     doctor: '',
     type: '',
     notes: ''
   });
+
+  // BMI is derived from height + weight when both are present, using the same
+  // formula as the HealthRecord pre-save hook so the stored value and the value
+  // sent to the ML service never disagree.
+  const bmiIsDerived = Number(formData.height) > 0 && Number(formData.weight) > 0;
+
+  const updateField = (field, value) => {
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value };
+      if (field === 'height' || field === 'weight') {
+        const h = Number(next.height) / 100;
+        const w = Number(next.weight);
+        if (h > 0 && w > 0) {
+          next.bmi = String(Math.round((w / (h * h)) * 10) / 10);
+        }
+      }
+      return next;
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,10 +74,17 @@ const AddHealthRecord = () => {
           bpSystolic: Number(formData.bpSystolic) || 0,
           bpDiastolic: Number(formData.bpDiastolic) || 0,
           sugarFasting: Number(formData.glucose) || 0,
+          heartRate: Number(formData.heartRate) || 0,
         },
         bmi: Number(formData.bmi) || 0,
-        sleepHours: 0,
-        waterIntake: 0,
+        weight: Number(formData.weight) || 0,
+        height: Number(formData.height) || 0,
+        sleepHours: Number(formData.sleepHours) || 0,
+        waterIntake: Number(formData.waterIntake) || 0,
+        exerciseMinutes: Number(formData.exerciseMinutes) || 0,
+        caloriesIntake: Number(formData.caloriesIntake) || 0,
+        stepsCount: Number(formData.stepsCount) || 0,
+        mood: formData.mood || undefined,
         notes: formData.notes,
         doctor: formData.doctor,
         age: Number(formData.age) || 0,
@@ -94,7 +131,7 @@ const AddHealthRecord = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      
+
       {/* Header */}
       <div>
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-500 text-xs font-semibold border border-brand-500/30 mb-2">
@@ -121,18 +158,18 @@ const AddHealthRecord = () => {
       {/* ML PREDICTION RESULT */}
       {prediction && (
         <div className={`glass-panel p-6 rounded-3xl border-2 shadow-xl ${
-          prediction.riskLevel === 'High Risk' 
-            ? 'border-rose-500/50 bg-rose-500/5' 
-            : prediction.riskLevel === 'Moderate Risk' 
-            ? 'border-amber-500/50 bg-amber-500/5' 
+          prediction.riskLevel === 'High Risk'
+            ? 'border-rose-500/50 bg-rose-500/5'
+            : prediction.riskLevel === 'Moderate Risk'
+            ? 'border-amber-500/50 bg-amber-500/5'
             : 'border-emerald-500/50 bg-emerald-500/5'
         }`}>
           <div className="flex items-center gap-3 mb-4">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              prediction.riskLevel === 'High Risk' 
-                ? 'bg-rose-500/20 text-rose-400' 
-                : prediction.riskLevel === 'Moderate Risk' 
-                ? 'bg-amber-500/20 text-amber-400' 
+              prediction.riskLevel === 'High Risk'
+                ? 'bg-rose-500/20 text-rose-400'
+                : prediction.riskLevel === 'Moderate Risk'
+                ? 'bg-amber-500/20 text-amber-400'
                 : 'bg-emerald-500/20 text-emerald-400'
             }`}>
               <Sparkles className="w-5 h-5" />
@@ -146,8 +183,8 @@ const AddHealthRecord = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <div className="p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 text-center">
               <p className={`text-2xl font-black ${
-                prediction.riskLevel === 'High Risk' ? 'text-rose-400' 
-                : prediction.riskLevel === 'Moderate Risk' ? 'text-amber-400' 
+                prediction.riskLevel === 'High Risk' ? 'text-rose-400'
+                : prediction.riskLevel === 'Moderate Risk' ? 'text-amber-400'
                 : 'text-emerald-400'
               }`}>
                 {prediction.riskPercentage}%
@@ -156,8 +193,8 @@ const AddHealthRecord = () => {
             </div>
             <div className="p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 text-center">
               <p className={`text-lg font-black ${
-                prediction.riskLevel === 'High Risk' ? 'text-rose-400' 
-                : prediction.riskLevel === 'Moderate Risk' ? 'text-amber-400' 
+                prediction.riskLevel === 'High Risk' ? 'text-rose-400'
+                : prediction.riskLevel === 'Moderate Risk' ? 'text-amber-400'
                 : 'text-emerald-400'
               }`}>
                 {prediction.riskLevel}
@@ -193,13 +230,13 @@ const AddHealthRecord = () => {
 
       {/* FORM CARD */}
       <form onSubmit={handleSubmit} className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 space-y-8 shadow-xl">
-        
+
         {/* SECTION 1: Patient Demographics */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
             <User className="w-4 h-4 text-brand-500" />
             <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-              1. Demographics & Checkup Meta
+              1. Demographics &amp; Checkup Meta
             </h3>
           </div>
 
@@ -209,21 +246,21 @@ const AddHealthRecord = () => {
               id="age"
               type="number"
               value={formData.age}
-              onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+              onChange={(e) => updateField('age', e.target.value)}
               required
             />
             <Input
               label="Checkup Type"
               id="type"
               value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              onChange={(e) => updateField('type', e.target.value)}
               required
             />
             <Input
               label="Attending Doctor"
               id="doctor"
               value={formData.doctor}
-              onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
+              onChange={(e) => updateField('doctor', e.target.value)}
               required
             />
           </div>
@@ -244,7 +281,7 @@ const AddHealthRecord = () => {
               id="pregnancies"
               type="number"
               value={formData.pregnancies}
-              onChange={(e) => setFormData({ ...formData, pregnancies: e.target.value })}
+              onChange={(e) => updateField('pregnancies', e.target.value)}
               required
             />
             <Input
@@ -252,7 +289,16 @@ const AddHealthRecord = () => {
               id="glucose"
               type="number"
               value={formData.glucose}
-              onChange={(e) => setFormData({ ...formData, glucose: e.target.value })}
+              onChange={(e) => updateField('glucose', e.target.value)}
+              required
+            />
+            <Input
+              label="Systolic Blood Pressure (mmHg)"
+              id="bpSystolic"
+              type="number"
+              value={formData.bpSystolic}
+              onChange={(e) => updateField('bpSystolic', e.target.value)}
+              helperText="Upper reading, e.g. 120"
               required
             />
             <Input
@@ -260,15 +306,23 @@ const AddHealthRecord = () => {
               id="bpDiastolic"
               type="number"
               value={formData.bpDiastolic}
-              onChange={(e) => setFormData({ ...formData, bpDiastolic: e.target.value })}
+              onChange={(e) => updateField('bpDiastolic', e.target.value)}
+              helperText="Lower reading, e.g. 80"
               required
+            />
+            <Input
+              label="Resting Heart Rate (bpm)"
+              id="heartRate"
+              type="number"
+              value={formData.heartRate}
+              onChange={(e) => updateField('heartRate', e.target.value)}
             />
             <Input
               label="Skin Thickness (mm)"
               id="skinThickness"
               type="number"
               value={formData.skinThickness}
-              onChange={(e) => setFormData({ ...formData, skinThickness: e.target.value })}
+              onChange={(e) => updateField('skinThickness', e.target.value)}
               required
             />
             <Input
@@ -276,16 +330,7 @@ const AddHealthRecord = () => {
               id="insulin"
               type="number"
               value={formData.insulin}
-              onChange={(e) => setFormData({ ...formData, insulin: e.target.value })}
-              required
-            />
-            <Input
-              label="Body Mass Index (BMI)"
-              id="bmi"
-              type="number"
-              step="0.1"
-              value={formData.bmi}
-              onChange={(e) => setFormData({ ...formData, bmi: e.target.value })}
+              onChange={(e) => updateField('insulin', e.target.value)}
               required
             />
             <Input
@@ -294,18 +339,139 @@ const AddHealthRecord = () => {
               type="number"
               step="0.001"
               value={formData.diabetesPedigreeFunction}
-              onChange={(e) => setFormData({ ...formData, diabetesPedigreeFunction: e.target.value })}
+              onChange={(e) => updateField('diabetesPedigreeFunction', e.target.value)}
               required
             />
           </div>
         </div>
 
-        {/* SECTION 3: Notes */}
+        {/* SECTION 3: Body Measurements */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
-            <FileText className="w-4 h-4 text-emerald-400" />
+            <Scale className="w-4 h-4 text-violet-400" />
             <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-              3. Notes
+              3. Body Measurements
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Input
+              label="Weight (kg)"
+              id="weight"
+              type="number"
+              step="0.1"
+              icon={Scale}
+              value={formData.weight}
+              onChange={(e) => updateField('weight', e.target.value)}
+            />
+            <Input
+              label="Height (cm)"
+              id="height"
+              type="number"
+              step="0.1"
+              icon={Ruler}
+              value={formData.height}
+              onChange={(e) => updateField('height', e.target.value)}
+            />
+            <Input
+              label="Body Mass Index (BMI)"
+              id="bmi"
+              type="number"
+              step="0.1"
+              value={formData.bmi}
+              onChange={(e) => updateField('bmi', e.target.value)}
+              readOnly={bmiIsDerived}
+              helperText={bmiIsDerived ? 'Auto-calculated from height & weight' : 'Or enter height & weight to auto-calculate'}
+              required
+            />
+          </div>
+        </div>
+
+        {/* SECTION 4: Lifestyle & Activity */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+            <Activity className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+              4. Lifestyle &amp; Activity
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Input
+              label="Sleep (hours)"
+              id="sleepHours"
+              type="number"
+              step="0.1"
+              icon={Moon}
+              value={formData.sleepHours}
+              onChange={(e) => updateField('sleepHours', e.target.value)}
+            />
+            <Input
+              label="Water Intake (litres)"
+              id="waterIntake"
+              type="number"
+              step="0.1"
+              icon={Droplets}
+              value={formData.waterIntake}
+              onChange={(e) => updateField('waterIntake', e.target.value)}
+            />
+            <Input
+              label="Exercise (minutes)"
+              id="exerciseMinutes"
+              type="number"
+              icon={Dumbbell}
+              value={formData.exerciseMinutes}
+              onChange={(e) => updateField('exerciseMinutes', e.target.value)}
+            />
+            <Input
+              label="Calories Intake (kcal)"
+              id="caloriesIntake"
+              type="number"
+              icon={Flame}
+              value={formData.caloriesIntake}
+              onChange={(e) => updateField('caloriesIntake', e.target.value)}
+            />
+            <Input
+              label="Steps Count"
+              id="stepsCount"
+              type="number"
+              icon={Footprints}
+              value={formData.stepsCount}
+              onChange={(e) => updateField('stepsCount', e.target.value)}
+            />
+
+            <div className="space-y-1.5 w-full">
+              <label htmlFor="mood" className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Mood
+              </label>
+              <div className="relative rounded-xl shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                  <Smile className="w-4 h-4" />
+                </div>
+                <select
+                  id="mood"
+                  value={formData.mood}
+                  onChange={(e) => updateField('mood', e.target.value)}
+                  className="w-full py-2.5 pl-10 pr-3 text-sm rounded-xl bg-white/70 dark:bg-slate-900/80 border border-slate-300/80 dark:border-slate-800/80 text-slate-900 dark:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-brand-500 focus:ring-brand-500/30"
+                >
+                  <option value="">Not specified</option>
+                  {MOOD_OPTIONS.map((m) => (
+                    <option key={m} value={m}>
+                      {m.charAt(0).toUpperCase() + m.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION 5: Notes */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+            <FileText className="w-4 h-4 text-amber-400" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+              5. Notes
             </h3>
           </div>
 
@@ -313,7 +479,7 @@ const AddHealthRecord = () => {
             <textarea
               rows="3"
               value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              onChange={(e) => updateField('notes', e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none"
               placeholder="Additional notes about this record..."
             />
@@ -339,7 +505,7 @@ const AddHealthRecord = () => {
             ) : (
               <>
                 <ShieldCheck className="w-4 h-4" />
-                Save & Predict Risk
+                Save &amp; Predict Risk
               </>
             )}
           </Button>

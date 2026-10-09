@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authAPI } from '../../services/api';
-import { Mail, ArrowRight, ArrowLeft, CheckCircle2, Loader2, KeyRound } from 'lucide-react';
+import { Mail, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
@@ -12,7 +12,10 @@ const ForgotPassword = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [resetToken, setResetToken] = useState('');
+  // Only populated when the backend is running without SMTP credentials and has
+  // delivered the mail to a capture inbox. The reset token itself is never sent
+  // to the browser; it exists only inside the emailed link.
+  const [previewUrl, setPreviewUrl] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,7 +33,7 @@ const ForgotPassword = () => {
 
     try {
       const res = await authAPI.forgotPassword(email);
-      setResetToken(res.resetToken);
+      setPreviewUrl(res.previewUrl || '');
       setIsSubmitted(true);
     } catch (err) {
       setError(err.message || 'Failed to send reset link');
@@ -57,16 +60,22 @@ const ForgotPassword = () => {
 
           <Alert
             type="success"
-            title="Password Reset Link Dispatched"
-            message="Please check your inbox and follow the security link to set your new password. Check spam folder if not received in 2 minutes."
+            title="Password Reset Link Sent"
+            message="If an account exists for that address, a reset link is on its way. The link expires in 15 minutes and can only be used once. Check your spam folder if it has not arrived in 2 minutes."
           />
 
           <div className="pt-2 space-y-3">
-            <Link to={`/reset-password?token=${resetToken}`}>
-              <Button variant="primary" size="md" className="w-full">
-                Simulate Entering Reset Password Screen <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
+            {previewUrl && (
+              <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="block">
+                <Button variant="primary" size="md" className="w-full">
+                  Open the reset email <ArrowRight className="w-4 h-4" />
+                </Button>
+                <span className="block text-[10px] text-slate-500 dark:text-slate-400 mt-2">
+                  No SMTP account is configured, so the message was delivered to a capture inbox.
+                  This button opens it so the reset flow can be demonstrated locally.
+                </span>
+              </a>
+            )}
 
             <Link to="/login" className="block text-xs font-bold text-slate-500 hover:text-brand-400">
               Return to Sign In

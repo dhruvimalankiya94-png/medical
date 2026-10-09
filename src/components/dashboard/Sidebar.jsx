@@ -7,6 +7,7 @@ import {
   LogOut, X, ChevronRight 
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { avatarUrl } from '../../utils/avatar';
 
 const mainNavItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -151,7 +152,7 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
           <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <Link to="/profile" className="flex items-center gap-2.5 overflow-hidden">
               <img
-                src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150"
+                src={avatarUrl(user)}
                 alt={user?.name || 'User'}
                 className="w-8 h-8 rounded-full object-cover border border-brand-500 shrink-0"
               />
@@ -160,9 +161,9 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
                 <p className="text-[10px] text-slate-400 truncate">{user?.email || 'user@email.com'}</p>
               </div>
             </Link>
-            <Link to="/login" title="Sign Out">
+            <button type="button" onClick={handleLogout} title="Sign Out" aria-label="Sign Out">
               <LogOut className="w-4 h-4 text-slate-400 hover:text-rose-400 transition-colors" />
-            </Link>
+            </button>
           </div>
         </div>
       </aside>

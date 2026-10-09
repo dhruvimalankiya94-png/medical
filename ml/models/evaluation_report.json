@@ -26,7 +26,7 @@
     "precision": 0.6829268292682927,
     "recall": 0.5185185185185185,
     "f1_score": 0.5894736842105263,
-    "roc_auc": 0.8170370370370371,
+    "roc_auc": 0.8151851851851851,
     "confusion_matrix": [
       [
         87,
@@ -39,14 +39,14 @@
     ]
   },
   "feature_importances": {
-    "Pregnancies": 0.0726,
+    "Pregnancies": 0.0724,
     "Glucose": 0.332,
-    "BloodPressure": 0.0602,
-    "SkinThickness": 0.0594,
-    "Insulin": 0.0887,
-    "BMI": 0.1726,
+    "BloodPressure": 0.06,
+    "SkinThickness": 0.0601,
+    "Insulin": 0.0884,
+    "BMI": 0.1728,
     "DiabetesPedigreeFunction": 0.1035,
-    "Age": 0.111
+    "Age": 0.1107
   },
   "selection_rationale": "Random Forest was selected due to superior Recall (sensitivity) and F1-score on clinical positive cases, alongside non-linear interaction modeling for Glucose, Insulin, and BMI metrics."
 }

@@ -68,6 +68,10 @@ const healthRecordSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Every dashboard, report and pagination query filters by user and orders by
+// recordDate, so this covers all of them and keeps them off collection scans.
+healthRecordSchema.index({ user: 1, recordDate: -1 });
+
 healthRecordSchema.pre('save', function () {
   if (this.height && this.weight) {
     const h = this.height / 100;

@@ -6,7 +6,9 @@ A full-stack personal health management and analytics platform built as a Final 
 
 **Frontend:** React.js, Vite, Tailwind CSS, Framer Motion, Recharts, Chart.js, jsPDF
 
-**Backend:** Node.js, Express 5, MongoDB, Mongoose, JWT, bcryptjs
+**Backend:** Node.js, Express 5, MongoDB, Mongoose, JWT, bcryptjs, Nodemailer, Swagger UI
+
+**Testing:** Jest, Supertest
 
 **ML Service:** Python FastAPI, scikit-learn (diabetes risk prediction)
 
@@ -23,9 +25,14 @@ A full-stack personal health management and analytics platform built as a Final 
 - Risk Assessment (ML-powered diabetes prediction)
 - Data-driven Recommendations
 - Profile management with photo upload
-- Settings with theme & notification preferences
-- Secure JWT authentication with forgot/reset password
+- Threshold-based Health Alerts screened against clinical reference ranges
+- Clinical normal-range bands on all analytics charts
+- Data export (CSV + full-account JSON) and account deletion
+- Change password from Settings; account preferences stored server-side
+- Secure JWT authentication with email-delivered password reset
+- Interactive Swagger API documentation at /api/docs
 - Rate limiting & input validation
+- Automated Jest + Supertest test suite (149 tests)
 
 ## Setup
 
@@ -41,9 +48,18 @@ A full-stack personal health management and analytics platform built as a Final 
 cd backend
 cp .env.example .env    # configure MONGO_URI, JWT_SECRET
 npm install
-npm run seed             # seed demo data (4 users, 930+ records)
-npm start                # runs on port 5000
+npm run seed             # seed demo data (4 users, 93 records, 200+ tasks)
+npm start                # runs on port 5001
+npm test                 # run the Jest + Supertest suite
+npm run test:coverage    # the same suite with a coverage report
 ```
+
+API documentation is served at <http://localhost:5001/api/docs> once the
+backend is running, and the raw OpenAPI 3.0 document at `/api/docs.json`.
+
+The test suite creates and drops its own `healthpulse_test_*` database, so it
+never touches development data. It needs a MongoDB server on
+`mongodb://127.0.0.1:27017` (override with `MONGO_URI_TEST`).
 
 ### ML Service (Optional)
 
@@ -74,17 +90,18 @@ npm run dev              # runs on port 5173
 ### backend/.env
 
 ```
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/healthcare
+PORT=5001
+MONGO_URI=mongodb://localhost:27017/smart_healthcare
 JWT_SECRET=your_secret_key
 JWT_EXPIRE=7d
 ML_SERVICE_URL=http://localhost:8000
+CLIENT_URL=http://localhost:3000
 ```
 
 ### Root (.env)
 
 ```
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5001/api
 ```
 
 ## Project Structure
@@ -99,8 +116,12 @@ medical_project/
 │   ├── services/         # ML service integration
 │   ├── uploads/          # User-uploaded files (avatars)
 │   ├── config/db.js      # MongoDB connection
+│   ├── docs/openapi.js   # OpenAPI 3.0 specification
+│   ├── tests/            # Jest + Supertest suites
+│   ├── utils/            # Shared helpers (local-calendar date keys)
 │   ├── seed.js           # Database seeder
-│   └── server.js         # Express app entry point
+│   ├── app.js            # Express app (no listener, used by tests)
+│   └── server.js         # Entry point: connects DB and listens
 ├── ml/                   # Python FastAPI ML service
 ├── src/
 │   ├── components/       # Reusable React components

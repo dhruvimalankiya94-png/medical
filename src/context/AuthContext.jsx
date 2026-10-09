@@ -48,6 +48,18 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  /**
+   * Re-read the signed-in user from the server and update the cached copy.
+   * Used after a profile or avatar change so the sidebar and topbar pick up the
+   * new values without a full page reload.
+   */
+  const refreshUser = async () => {
+    const userData = await authAPI.getMe();
+    setUser(userData);
+    localStorage.setItem('healthcare_user', JSON.stringify(userData));
+    return userData;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -58,6 +70,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        refreshUser,
       }}
     >
       {children}

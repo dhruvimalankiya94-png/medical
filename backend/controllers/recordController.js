@@ -20,6 +20,14 @@ const createHealthRecord = async (req, res) => {
       doctor,
       notes,
       vitals,
+      weight,
+      height,
+      sleepHours,
+      waterIntake,
+      exerciseMinutes,
+      caloriesIntake,
+      stepsCount,
+      mood,
     } = req.body;
 
     const bpSystolic = vitals?.bpSystolic || bloodPressure || 0;
@@ -41,6 +49,7 @@ const createHealthRecord = async (req, res) => {
         bpSystolic: bpSystolic,
         bpDiastolic: bpDiastolic,
         sugarFasting: glucose || undefined,
+        heartRate: vitals?.heartRate || undefined,
       },
       pregnancies: pregnancies || 0,
       glucose,
@@ -50,6 +59,18 @@ const createHealthRecord = async (req, res) => {
       bmi,
       diabetesPedigreeFunction: diabetesPedigreeFunction || 0,
       age,
+      // Lifestyle & body metrics. These feed the Analytics charts, the
+      // dashboard tiles and the recommendation rules, all of which read them
+      // back through /api/reports/vitals-history.
+      weight: weight || 0,
+      height: height || 0,
+      sleepHours: sleepHours || 0,
+      waterIntake: waterIntake || 0,
+      exerciseMinutes: exerciseMinutes || 0,
+      caloriesIntake: caloriesIntake || 0,
+      stepsCount: stepsCount || 0,
+      // mood is an enum with no default, so only set it when one was picked.
+      ...(mood ? { mood } : {}),
       notes: notes || '',
       status: 'Recorded',
     });
@@ -151,7 +172,7 @@ const getHealthRecords = async (req, res) => {
 
     const total = await HealthRecord.countDocuments(filter);
     const records = await HealthRecord.find(filter)
-      .sort({ createdAt: -1 })
+      .sort({ recordDate: -1 })
       .skip(skip)
       .limit(limit);
 
@@ -203,7 +224,28 @@ const updateHealthRecord = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to update this record' });
     }
 
-    Object.assign(record, req.body);
+    // Whitelist the editable fields. A blanket Object.assign let a client
+    // rewrite `user`, `status` and the timestamps on their own record.
+    const EDITABLE = [
+      'recordType', 'type', 'doctor', 'notes', 'tags', 'mood', 'recordDate',
+      'weight', 'height', 'bmi',
+      'sleepHours', 'waterIntake', 'exerciseMinutes', 'caloriesIntake', 'stepsCount',
+    ];
+    const EDITABLE_VITALS = [
+      'bpSystolic', 'bpDiastolic', 'heartRate', 'temperature', 'oxygenSaturation',
+      'sugarFasting', 'sugarPostMeal', 'cholesterol', 'cholesterolHDL', 'cholesterolLDL',
+    ];
+
+    for (const key of EDITABLE) {
+      if (req.body[key] !== undefined) record[key] = req.body[key];
+    }
+
+    if (req.body.vitals && typeof req.body.vitals === 'object') {
+      for (const key of EDITABLE_VITALS) {
+        if (req.body.vitals[key] !== undefined) record.vitals[key] = req.body.vitals[key];
+      }
+    }
+
     const updatedRecord = await record.save();
     return res.json(updatedRecord);
   } catch (error) {
