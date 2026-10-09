@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, ArrowRight, Loader2, UserCheck, ShieldCheck } from 'lucide-react';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Input from '../../components/common/Input';
 import PasswordInput from '../../components/common/PasswordInput';
 import Checkbox from '../../components/common/Checkbox';
 import Button from '../../components/common/Button';
 import Divider from '../../components/common/Divider';
-import SocialButton from '../../components/auth/SocialButton';
 import Alert from '../../components/common/Alert';
 import { useAuth } from '../../context/AuthContext';
 
@@ -32,6 +31,15 @@ const Login = () => {
     if (!formData.password) errs.password = 'Password is required';
     setErrors(errs);
     return Object.keys(errs).length === 0;
+  };
+
+  const fillDemoAccount = (email, password) => {
+    setFormData((prev) => ({
+      ...prev,
+      email,
+      password,
+    }));
+    setErrors({});
   };
 
   const handleSubmit = async (e) => {
@@ -62,17 +70,6 @@ const Login = () => {
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    setAlertState({
-      type: 'info',
-      title: `${provider} OAuth Initiated`,
-      message: `Connecting to ${provider} authentication... Redirecting to dashboard.`
-    });
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 1200);
-  };
-
   return (
     <AuthLayout
       title="Welcome Back"
@@ -94,7 +91,7 @@ const Login = () => {
           id="email"
           type="email"
           icon={Mail}
-          placeholder="dr.priya@aiims.edu.in"
+          placeholder="rahul.sharma@email.com"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           error={errors.email}
@@ -149,16 +146,70 @@ const Login = () => {
           )}
         </Button>
 
-        {/* Social Logins */}
-        <Divider label="Or continue with" />
+        {/* Testing Perspective - MongoDB Demo Accounts */}
+        <div className="pt-2">
+          <Divider label="Testing & Evaluation Perspective" />
+          <div className="mt-3 p-3.5 rounded-xl bg-slate-900/60 dark:bg-slate-900/80 border border-slate-700/60 text-xs">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-semibold text-slate-200 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Demo Accounts (Saved in MongoDB)
+              </span>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-brand-500/20 text-brand-400 border border-brand-500/30">
+                1-Click Fill
+              </span>
+            </div>
+            <p className="text-slate-400 mb-3 text-[11px] leading-relaxed">
+              Use these pre-seeded test accounts to explore patient health records, clinical analytics, and admin dashboard:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => fillDemoAccount('rahul.sharma@email.com', 'Password123!')}
+                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-brand-500/60 transition-all text-left group cursor-pointer"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <UserCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span className="font-medium text-slate-200 group-hover:text-brand-400 truncate text-[12px]">
+                      Rahul Sharma
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-mono block mt-0.5 truncate">
+                    rahul.sharma@email.com
+                  </span>
+                </div>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0 ml-1">
+                  Patient
+                </span>
+              </button>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <SocialButton provider="google" onClick={() => handleSocialLogin('Google')} />
-          <SocialButton provider="github" onClick={() => handleSocialLogin('GitHub')} />
+              <button
+                type="button"
+                onClick={() => fillDemoAccount('admin@healthpulse.com', 'Admin123!')}
+                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-brand-500/60 transition-all text-left group cursor-pointer"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    <span className="font-medium text-slate-200 group-hover:text-brand-400 truncate text-[12px]">
+                      Admin User
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-mono block mt-0.5 truncate">
+                    admin@healthpulse.com
+                  </span>
+                </div>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 shrink-0 ml-1">
+                  Admin
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Footer Link */}
-        <p className="text-center text-xs text-slate-500 dark:text-slate-400 pt-4">
+        <p className="text-center text-xs text-slate-500 dark:text-slate-400 pt-3">
           Don't have an account?{' '}
           <Link to="/register" className="font-bold text-brand-600 dark:text-brand-400 hover:underline">
             Create an Account
